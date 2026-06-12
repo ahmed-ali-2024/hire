@@ -41,6 +41,7 @@ import '../../features/recruitment/domain/usecases/get_candidates_usecase.dart';
 import '../../features/recruitment/domain/usecases/upload_cvs_usecase.dart';
 import '../../features/recruitment/presentation/cubit/recruitment_cubit.dart';
 import '../../features/recruitment/presentation/cubit/file_upload_cubit.dart';
+import '../../features/recruitment/presentation/cubit/session_detail_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -89,6 +90,10 @@ Future<void> init() async {
       ));
   sl.registerFactory(() => FileUploadCubit(
         uploadCVsUseCase: sl(),
+      ));
+  sl.registerFactory(() => SessionDetailCubit(
+        getSessionByIdUseCase: sl(),
+        getCandidatesUseCase: sl(),
       ));
   sl.registerLazySingleton(() => CreateSessionUseCase(sl()));
   sl.registerLazySingleton(() => GetSessionsUseCase(sl()));

@@ -7,8 +7,10 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/recruitment/presentation/cubit/recruitment_cubit.dart';
+import '../../features/recruitment/presentation/cubit/session_detail_cubit.dart';
 import '../../features/recruitment/presentation/pages/dashboard_page.dart';
 import '../../features/recruitment/presentation/pages/new_recruitment_page.dart';
+import '../../features/recruitment/presentation/pages/session_detail_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import 'app_shell_layout.dart';
 import 'error_page.dart';
@@ -72,7 +74,10 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/app/dashboard',
-            builder: (context, state) => const DashboardPage(),
+            builder: (context, state) => BlocProvider(
+              create: (context) => sl<RecruitmentCubit>(),
+              child: const DashboardPage(),
+            ),
           ),
           GoRoute(
             path: '/app/recruitment/new',
@@ -80,6 +85,16 @@ class AppRouter {
               create: (context) => sl<RecruitmentCubit>(),
               child: const NewRecruitmentPage(),
             ),
+          ),
+          GoRoute(
+            path: '/app/recruitment/:id',
+            builder: (context, state) {
+              final sessionId = state.pathParameters['id'] ?? '';
+              return BlocProvider(
+                create: (context) => sl<SessionDetailCubit>(),
+                child: SessionDetailPage(sessionId: sessionId),
+              );
+            },
           ),
           GoRoute(
             path: '/app/settings',
