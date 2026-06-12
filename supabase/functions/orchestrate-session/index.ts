@@ -365,9 +365,12 @@ serve(async (req) => {
 
       // --- Agent 1: Screening ---
       try {
+        console.log(`[Session ${sessionId}] Starting Screening Agent for candidate ${candidate.id}`);
         const { system, user } = getScreeningPrompt(candidate, jobDescription);
         const raw = await callAIMLAPI(aimlApiKey, system, user);
+        console.log(`[Session ${sessionId}] Screening Agent raw response length: ${raw.length}`);
         screeningResult = parseAgentResult(raw, "Screening");
+        console.log(`[Session ${sessionId}] Screening Agent parsed score: ${screeningResult.score}`);
 
         // Save to DB
         await supabase.from("agent_results").insert({
@@ -397,14 +400,17 @@ serve(async (req) => {
           await bandSendMessage(bandRoomId, screeningApiKey, msg, [{ id: coordinatorUUID, name: "Coordinator-Agent" }]);
         }
       } catch (e) {
-        console.error("Screening agent failed:", e);
+        console.error(`[Session ${sessionId}] Screening agent failed:`, e);
       }
 
       // --- Agent 2: Adversarial Reviewer (Featherless) ---
       try {
+        console.log(`[Session ${sessionId}] Starting Adversarial Reviewer for candidate ${candidate.id}`);
         const { system, user } = getReviewerPrompt(candidate, screeningResult, jobDescription);
         const raw = await callFeatherless(featherlessKey, system, user);
+        console.log(`[Session ${sessionId}] Adversarial Reviewer raw response length: ${raw.length}`);
         reviewResult = parseAgentResult(raw, "Reviewer");
+        console.log(`[Session ${sessionId}] Adversarial Reviewer parsed score: ${reviewResult.score}`);
 
         await supabase.from("agent_results").insert({
           session_id: sessionId,
@@ -432,14 +438,17 @@ serve(async (req) => {
           await bandSendMessage(bandRoomId, reviewerApiKey, msg, [{ id: coordinatorUUID, name: "Coordinator-Agent" }]);
         }
       } catch (e) {
-        console.error("Adversarial reviewer failed:", e);
+        console.error(`[Session ${sessionId}] Adversarial reviewer failed:`, e);
       }
 
       // --- Agent 3: Interview ---
       try {
+        console.log(`[Session ${sessionId}] Starting Interview Agent for candidate ${candidate.id}`);
         const { system, user } = getInterviewPrompt(candidate, jobDescription);
         const raw = await callAIMLAPI(aimlApiKey, system, user);
+        console.log(`[Session ${sessionId}] Interview Agent raw response length: ${raw.length}`);
         interviewResult = parseAgentResult(raw, "Interview");
+        console.log(`[Session ${sessionId}] Interview Agent parsed score: ${interviewResult.score}`);
 
         await supabase.from("agent_results").insert({
           session_id: sessionId,
@@ -466,14 +475,17 @@ serve(async (req) => {
           await bandSendMessage(bandRoomId, interviewApiKey, msg, [{ id: coordinatorUUID, name: "Coordinator-Agent" }]);
         }
       } catch (e) {
-        console.error("Interview agent failed:", e);
+        console.error(`[Session ${sessionId}] Interview agent failed:`, e);
       }
 
       // --- Agent 4: Cultural Fit ---
       try {
+        console.log(`[Session ${sessionId}] Starting Cultural Fit Agent for candidate ${candidate.id}`);
         const { system, user } = getCulturalPrompt(candidate, jobDescription);
         const raw = await callAIMLAPI(aimlApiKey, system, user);
+        console.log(`[Session ${sessionId}] Cultural Fit Agent raw response length: ${raw.length}`);
         culturalResult = parseAgentResult(raw, "Cultural");
+        console.log(`[Session ${sessionId}] Cultural Fit Agent parsed score: ${culturalResult.score}`);
 
         await supabase.from("agent_results").insert({
           session_id: sessionId,
@@ -500,14 +512,17 @@ serve(async (req) => {
           await bandSendMessage(bandRoomId, culturalApiKey, msg, [{ id: coordinatorUUID, name: "Coordinator-Agent" }]);
         }
       } catch (e) {
-        console.error("Cultural agent failed:", e);
+        console.error(`[Session ${sessionId}] Cultural agent failed:`, e);
       }
 
       // --- Agent 5: Coordinator Final Report ---
       try {
+        console.log(`[Session ${sessionId}] Starting Coordinator Agent for candidate ${candidate.id}`);
         const { system, user } = getCoordinatorPrompt(candidate, screeningResult, reviewResult, interviewResult, culturalResult);
         const raw = await callAIMLAPI(aimlApiKey, system, user);
+        console.log(`[Session ${sessionId}] Coordinator Agent raw response length: ${raw.length}`);
         const coordResult = parseAgentResult(raw, "Coordinator");
+        console.log(`[Session ${sessionId}] Coordinator Agent parsed score: ${coordResult.score}`);
 
         const hasConflict = (coordResult.rawData as Record<string, unknown>)?.has_conflict as boolean ?? false;
         const conflictNote = (coordResult.rawData as Record<string, unknown>)?.conflict_note as string ?? null;
@@ -573,7 +588,7 @@ serve(async (req) => {
           await bandSendMessage(bandRoomId, coordinatorApiKey, finalMsg, mentions.length > 0 ? mentions : [{ id: screeningUUID || "", name: "team" }]);
         }
       } catch (e) {
-        console.error("Coordinator agent failed:", e);
+        console.error(`[Session ${sessionId}] Coordinator agent failed:`, e);
       }
     } // end candidates loop
 
@@ -583,6 +598,7 @@ serve(async (req) => {
       .update({ status: "completed" })
       .eq("id", sessionId);
 
+    console.log(`[Session ${sessionId}] Orchestration completed successfully for ${candidates.length} candidates.`);
     return new Response(
       JSON.stringify({
         success: true,
