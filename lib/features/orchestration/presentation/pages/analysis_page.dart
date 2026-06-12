@@ -33,14 +33,15 @@ class AnalysisPage extends StatefulWidget {
 
 class _AgentStep {
   final String key;
-  final String label;
+  final String title;
   final String emoji;
   final String description;
 
-  _AgentStep(this.key, this.label, this.emoji, this.description);
+  _AgentStep(this.key, this.title, this.emoji, this.description);
 }
 
-class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMixin {
+class _AnalysisPageState extends State<AnalysisPage>
+    with TickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final AnimationController _progressController;
   int _activeStep = 0;
@@ -49,11 +50,36 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
   bool _started = false;
 
   final List<_AgentStep> _steps = [
-    _AgentStep('screening', 'Screening Agent', '🔍', 'Analyzing CV against job requirements'),
-    _AgentStep('adversarialReview', 'Adversarial Reviewer', '⚔️', 'Critical review for bias detection'),
-    _AgentStep('technicalInterview', 'Interview Agent', '💼', 'Technical assessment simulation'),
-    _AgentStep('culturalAssessment', 'Cultural Fit Agent', '🌐', 'Cultural alignment evaluation'),
-    _AgentStep('coordination', 'Coordinator Agent', '🎯', 'Final report synthesis'),
+    _AgentStep(
+      'screening',
+      'Screening Agent',
+      '🔍',
+      'Analyzing CV against job requirements',
+    ),
+    _AgentStep(
+      'adversarialReview',
+      'Adversarial Reviewer',
+      '⚔️',
+      'Critical review for bias detection',
+    ),
+    _AgentStep(
+      'technicalInterview',
+      'Interview Agent',
+      '💼',
+      'Technical assessment simulation',
+    ),
+    _AgentStep(
+      'culturalAssessment',
+      'Cultural Fit Agent',
+      '🌐',
+      'Cultural alignment evaluation',
+    ),
+    _AgentStep(
+      'coordination',
+      'Coordinator Agent',
+      '🎯',
+      'Final report synthesis',
+    ),
   ];
 
   @override
@@ -93,7 +119,9 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
         });
         _progressController.forward();
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          context.read<OrchestrationCubit>().loadSessionReports(widget.sessionId);
+          context.read<OrchestrationCubit>().loadSessionReports(
+            widget.sessionId,
+          );
         });
       }
     } else {
@@ -112,11 +140,13 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
           _activeStep = step;
         });
         if (step > 0) _progressController.forward();
-        
+
         // If it somehow reached the end
         if (step >= _steps.length) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<OrchestrationCubit>().loadSessionReports(widget.sessionId);
+            context.read<OrchestrationCubit>().loadSessionReports(
+              widget.sessionId,
+            );
           });
         }
       }
@@ -157,7 +187,8 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
               setState(() {
                 _bandMessages.add(payload.newRecord);
                 // Advance step indicator
-                final agent = payload.newRecord['sender_agent'] as String? ?? '';
+                final agent =
+                    payload.newRecord['sender_agent'] as String? ?? '';
                 final stepIdx = _steps.indexWhere((s) => s.key == agent);
                 if (stepIdx != -1 && stepIdx > _activeStep) {
                   _activeStep = stepIdx + 1;
@@ -180,11 +211,11 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrchestrationCubit>().startOrchestration(
-            sessionId: widget.sessionId,
-            jobTitle: widget.jobTitle,
-            jobDescription: widget.jobDescription,
-            candidates: widget.candidates,
-          );
+        sessionId: widget.sessionId,
+        jobTitle: widget.jobTitle,
+        jobDescription: widget.jobDescription,
+        candidates: widget.candidates,
+      );
     });
   }
 
@@ -198,46 +229,58 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0E1A),
-      body: BlocConsumer<OrchestrationCubit, OrchestrationState>(
-        listener: (context, state) {
-          if (state is OrchestrationCompleted) {
-            setState(() => _activeStep = _steps.length);
-            _progressController.forward();
-          } else if (state is OrchestrationError) {
-            AppLogger.instance.e('Orchestration error on UI', state.message);
-          }
-        },
-        builder: (context, state) {
-          return CustomScrollView(
-            slivers: [
-              _buildAppBar(),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    const SizedBox(height: 24),
-                    _buildStatusCard(state),
-                    const SizedBox(height: 24),
-                    _buildAgentPipeline(state),
-                    const SizedBox(height: 24),
-                    if (_bandMessages.isNotEmpty) ...[
-                      _buildBandMessagesPanel(),
+    return PopScope(
+      canPop: _activeStep >= _steps.length,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please wait for the analysis to complete.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0F172A),
+        body: BlocConsumer<OrchestrationCubit, OrchestrationState>(
+          listener: (context, state) {
+            if (state is OrchestrationCompleted) {
+              setState(() => _activeStep = _steps.length);
+              _progressController.forward();
+            } else if (state is OrchestrationError) {
+              AppLogger.instance.e('Orchestration error on UI', state.message);
+            }
+          },
+          builder: (context, state) {
+            return CustomScrollView(
+              slivers: [
+                _buildAppBar(),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
                       const SizedBox(height: 24),
-                    ],
-                    if (state is OrchestrationCompleted) ...[
-                      _buildResultsPanel(state.reports),
+                      _buildStatusCard(state),
                       const SizedBox(height: 24),
-                      _buildCompletedActions(state),
-                    ],
-                    const SizedBox(height: 40),
-                  ]),
+                      _buildAgentPipeline(state),
+                      const SizedBox(height: 24),
+                      if (_bandMessages.isNotEmpty) ...[
+                        _buildBandMessagesPanel(),
+                        const SizedBox(height: 24),
+                      ],
+                      if (state is OrchestrationCompleted) ...[
+                        _buildResultsPanel(state.reports),
+                        const SizedBox(height: 24),
+                        _buildCompletedActions(state),
+                      ],
+                      const SizedBox(height: 40),
+                    ]),
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -272,10 +315,7 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
             ),
             Text(
               widget.jobTitle,
-              style: const TextStyle(
-                color: Color(0xFF6C7AFF),
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: Color(0xFF6C7AFF), fontSize: 12),
             ),
           ],
         ),
@@ -311,7 +351,10 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [statusColor.withOpacity(0.15), statusColor.withOpacity(0.05)],
+          colors: [
+            statusColor.withOpacity(0.15),
+            statusColor.withOpacity(0.05),
+          ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: statusColor.withOpacity(0.3)),
@@ -350,7 +393,10 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
                 const SizedBox(height: 4),
                 Text(
                   '${widget.candidates.length} candidate${widget.candidates.length > 1 ? 's' : ''} · Band.ai Connected',
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -427,7 +473,9 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
                   height: 36,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: dotColor.withOpacity(isActive ? 0.15 + (_pulseController.value * 0.1) : 0.1),
+                    color: dotColor.withOpacity(
+                      isActive ? 0.15 + (_pulseController.value * 0.1) : 0.1,
+                    ),
                     border: Border.all(
                       color: dotColor,
                       width: isActive ? 2 : 1.5,
@@ -435,7 +483,11 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
                   ),
                   child: Center(
                     child: isCompleted
-                        ? const Icon(Icons.check, color: Color(0xFF00E5A0), size: 16)
+                        ? const Icon(
+                            Icons.check,
+                            color: Color(0xFF00E5A0),
+                            size: 16,
+                          )
                         : Text(
                             step.emoji,
                             style: const TextStyle(fontSize: 14),
@@ -447,7 +499,9 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
                 Container(
                   width: 2,
                   height: 32,
-                  color: isCompleted ? const Color(0xFF00E5A0).withOpacity(0.4) : Colors.white12,
+                  color: isCompleted
+                      ? const Color(0xFF00E5A0).withOpacity(0.4)
+                      : Colors.white12,
                 ),
             ],
           ),
@@ -484,7 +538,9 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
                           value: null,
                           backgroundColor: Colors.white12,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            const Color(0xFF6C7AFF).withOpacity(0.7 + _pulseController.value * 0.3),
+                            const Color(
+                              0xFF6C7AFF,
+                            ).withOpacity(0.7 + _pulseController.value * 0.3),
                           ),
                           borderRadius: BorderRadius.circular(2),
                         ),
@@ -514,20 +570,33 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF6C7AFF).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF6C7AFF).withOpacity(0.4)),
+                  border: Border.all(
+                    color: const Color(0xFF6C7AFF).withOpacity(0.4),
+                  ),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.broadcast_on_home, color: Color(0xFF6C7AFF), size: 14),
+                    Icon(
+                      Icons.broadcast_on_home,
+                      color: Color(0xFF6C7AFF),
+                      size: 14,
+                    ),
                     SizedBox(width: 6),
                     Text(
                       'Band.ai Live',
-                      style: TextStyle(color: Color(0xFF6C7AFF), fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Color(0xFF6C7AFF),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -591,10 +660,17 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
               const SizedBox(width: 8),
               Text(
                 _agentDisplayName(sender),
-                style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               if (receiver.isNotEmpty) ...[
-                const Text(' → ', style: TextStyle(color: Colors.white38, fontSize: 11)),
+                const Text(
+                  ' → ',
+                  style: TextStyle(color: Colors.white38, fontSize: 11),
+                ),
                 Text(
                   _agentDisplayName(receiver),
                   style: const TextStyle(color: Colors.white38, fontSize: 11),
@@ -603,14 +679,21 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
               if (score != null) ...[
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '${(score as num).toStringAsFixed(1)}/10',
-                    style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -619,7 +702,9 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
           if (summary.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
-              summary.length > 120 ? '${summary.substring(0, 120)}...' : summary,
+              summary.length > 120
+                  ? '${summary.substring(0, 120)}...'
+                  : summary,
               style: const TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ],
@@ -641,7 +726,11 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
         children: [
           const Row(
             children: [
-              Icon(Icons.analytics_outlined, color: Color(0xFF00E5A0), size: 20),
+              Icon(
+                Icons.analytics_outlined,
+                color: Color(0xFF00E5A0),
+                size: 20,
+              ),
               SizedBox(width: 8),
               Text(
                 'Final Results',
@@ -692,7 +781,10 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
                   children: [
                     Text(
                       'Overall Score',
-                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 11,
+                      ),
                     ),
                     Text(
                       '${report.overallScore.toStringAsFixed(1)}/10',
@@ -706,7 +798,10 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -714,15 +809,31 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
                 ),
                 child: Text(
                   labels[recommendation] ?? '',
-                  style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          _buildScoreRow('Screening', report.screeningScore, const Color(0xFF6C7AFF)),
-          _buildScoreRow('Technical', report.technicalScore, const Color(0xFFFFB347)),
-          _buildScoreRow('Cultural', report.culturalScore, const Color(0xFF00E5A0)),
+          _buildScoreRow(
+            'Screening',
+            report.screeningScore,
+            const Color(0xFF6C7AFF),
+          ),
+          _buildScoreRow(
+            'Technical',
+            report.technicalScore,
+            const Color(0xFFFFB347),
+          ),
+          _buildScoreRow(
+            'Cultural',
+            report.culturalScore,
+            const Color(0xFF00E5A0),
+          ),
           if (report.hasConflict) ...[
             const SizedBox(height: 8),
             Container(
@@ -733,12 +844,19 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber, color: Color(0xFFFFB347), size: 16),
+                  const Icon(
+                    Icons.warning_amber,
+                    color: Color(0xFFFFB347),
+                    size: 16,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       report.conflictNote ?? 'Conflict detected between agents',
-                      style: const TextStyle(color: Color(0xFFFFB347), fontSize: 12),
+                      style: const TextStyle(
+                        color: Color(0xFFFFB347),
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -783,7 +901,11 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
           const SizedBox(width: 8),
           Text(
             score.toStringAsFixed(1),
-            style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -802,7 +924,9 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF6C7AFF),
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
           ),
         ),
@@ -813,11 +937,17 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
             decoration: BoxDecoration(
               color: const Color(0xFF6C7AFF).withOpacity(0.1),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFF6C7AFF).withOpacity(0.3)),
+              border: Border.all(
+                color: const Color(0xFF6C7AFF).withOpacity(0.3),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.broadcast_on_home, color: Color(0xFF6C7AFF), size: 18),
+                const Icon(
+                  Icons.broadcast_on_home,
+                  color: Color(0xFF6C7AFF),
+                  size: 18,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -825,16 +955,27 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
                     children: [
                       const Text(
                         'View in Band Dashboard',
-                        style: TextStyle(color: Color(0xFF6C7AFF), fontWeight: FontWeight.bold, fontSize: 13),
+                        style: TextStyle(
+                          color: Color(0xFF6C7AFF),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                       Text(
                         'Room: ${state.bandRoomId.substring(0, 8)}...',
-                        style: const TextStyle(color: Colors.white38, fontSize: 11),
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.open_in_new, color: Color(0xFF6C7AFF), size: 16),
+                const Icon(
+                  Icons.open_in_new,
+                  color: Color(0xFF6C7AFF),
+                  size: 16,
+                ),
               ],
             ),
           ),
@@ -853,13 +994,4 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
     };
     return names[key] ?? key;
   }
-}
-
-class _AgentStep {
-  final String key;
-  final String title;
-  final String emoji;
-  final String description;
-
-  const _AgentStep(this.key, this.title, this.emoji, this.description);
 }

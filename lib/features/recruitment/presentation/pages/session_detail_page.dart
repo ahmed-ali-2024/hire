@@ -195,8 +195,8 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
 
                               const SizedBox(height: 20),
 
-                              // Start analysis button if pending or failed
-                              if (session.status == SessionStatus.pending || session.status == SessionStatus.failed)
+                              // Start or Resume analysis button if pending, failed, or analyzing
+                              if (session.status == SessionStatus.pending || session.status == SessionStatus.failed || session.status == SessionStatus.analyzing)
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
@@ -214,7 +214,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                       });
                                     },
                                     icon: const Icon(Icons.rocket_launch),
-                                    label: Text(isAr ? 'بدء تحليل وكلاء الذكاء الاصطناعي' : 'Start AI Agents Analysis'),
+                                    label: Text(isAr ? 'بدء / استكمال تحليل الذكاء الاصطناعي' : 'Start / Resume AI Analysis'),
                                     style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(vertical: 18),
                                       backgroundColor: theme.colorScheme.primary,
@@ -224,72 +224,6 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                       ),
                                     ),
                                   ),
-                                )
-                              else if (session.status == SessionStatus.analyzing)
-                                Column(
-                                  children: [
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          context.push(
-                                            '/app/analysis/${session.id}',
-                                            extra: {
-                                              'jobTitle': session.jobTitle,
-                                              'jobDescription': session.jobDescription,
-                                              'candidates': candidates,
-                                              'runAnalysis': false,
-                                            },
-                                          ).then((_) {
-                                            _fetchDetails();
-                                          });
-                                        },
-                                        icon: const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                        ),
-                                        label: Text(isAr ? 'عرض تقدم التحليل الحالي' : 'View Current Analysis Progress'),
-                                        style: ElevatedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(vertical: 18),
-                                          backgroundColor: theme.colorScheme.primary,
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: OutlinedButton.icon(
-                                        onPressed: () {
-                                          context.push(
-                                            '/app/analysis/${session.id}',
-                                            extra: {
-                                              'jobTitle': session.jobTitle,
-                                              'jobDescription': session.jobDescription,
-                                              'candidates': candidates,
-                                              'runAnalysis': true,
-                                            },
-                                          ).then((_) {
-                                            _fetchDetails();
-                                          });
-                                        },
-                                        icon: const Icon(Icons.refresh),
-                                        label: Text(isAr ? 'إعادة تشغيل التحليل بقوة (في حال توقفه)' : 'Force Restart Analysis'),
-                                        style: OutlinedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(vertical: 16),
-                                          foregroundColor: theme.colorScheme.primary,
-                                          side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.5)),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
                                 )
                               else if (session.status == SessionStatus.completed)
                                 SizedBox(
