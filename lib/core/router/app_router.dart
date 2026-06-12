@@ -6,12 +6,15 @@ import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../features/recruitment/domain/entities/candidate_entity.dart';
 import '../../features/recruitment/presentation/cubit/recruitment_cubit.dart';
 import '../../features/recruitment/presentation/cubit/session_detail_cubit.dart';
 import '../../features/recruitment/presentation/pages/dashboard_page.dart';
 import '../../features/recruitment/presentation/pages/new_recruitment_page.dart';
 import '../../features/recruitment/presentation/pages/session_detail_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/orchestration/presentation/cubit/orchestration_cubit.dart';
+import '../../features/orchestration/presentation/pages/analysis_page.dart';
 import 'app_shell_layout.dart';
 import 'error_page.dart';
 
@@ -99,6 +102,25 @@ class AppRouter {
           GoRoute(
             path: '/app/settings',
             builder: (context, state) => const SettingsPage(),
+          ),
+          GoRoute(
+            path: '/app/analysis/:sessionId',
+            builder: (context, state) {
+              final sessionId = state.pathParameters['sessionId'] ?? '';
+              final extra = state.extra as Map<String, dynamic>? ?? {};
+              final jobTitle = extra['jobTitle'] as String? ?? '';
+              final jobDescription = extra['jobDescription'] as String? ?? '';
+              final candidates = extra['candidates'] as List<CandidateEntity>? ?? [];
+              return BlocProvider(
+                create: (_) => sl<OrchestrationCubit>(),
+                child: AnalysisPage(
+                  sessionId: sessionId,
+                  jobTitle: jobTitle,
+                  jobDescription: jobDescription,
+                  candidates: candidates,
+                ),
+              );
+            },
           ),
         ],
       ),

@@ -13,6 +13,13 @@ import '../services/parser/cv_parser_service.dart';
 import '../l10n/locale_cubit.dart';
 import '../theme/theme_cubit.dart';
 
+// Orchestration Feature
+import '../../features/orchestration/data/datasources/orchestration_remote_datasource.dart';
+import '../../features/orchestration/data/repositories/orchestration_repository_impl.dart';
+import '../../features/orchestration/domain/repositories/orchestration_repository.dart';
+import '../../features/orchestration/domain/usecases/run_full_analysis_usecase.dart';
+import '../../features/orchestration/presentation/cubit/orchestration_cubit.dart';
+
 // Auth Features
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -112,6 +119,23 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SaveApiKeysUseCase(sl()));
   sl.registerLazySingleton<SettingsRepository>(() => SettingsRepositoryImpl(sl()));
   sl.registerLazySingleton<SettingsRemoteDataSource>(() => SettingsRemoteDataSourceImpl(sl()));
+
+  // Features - Orchestration
+  sl.registerLazySingleton<OrchestrationRemoteDataSource>(
+    () => OrchestrationRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<OrchestrationRepositoryImpl>(
+    () => OrchestrationRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<OrchestrationRepository>(
+    () => sl<OrchestrationRepositoryImpl>(),
+  );
+  sl.registerLazySingleton(() => RunFullAnalysisUseCase(sl()));
+  sl.registerFactory(() => OrchestrationCubit(
+        repositoryImpl: sl(),
+        repository: sl(),
+        supabaseClient: sl(),
+      ));
 
   // External
   sl.registerLazySingleton(() => Supabase.instance.client);
