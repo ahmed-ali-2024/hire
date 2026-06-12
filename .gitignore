@@ -9,5 +9,6 @@
 /.opencode
 /.specify
 /todo
-/.docs
+*.docs/
 /.build
+docs/
