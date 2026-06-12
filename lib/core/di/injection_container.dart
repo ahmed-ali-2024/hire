@@ -14,6 +14,7 @@ import '../../features/recruitment/domain/repositories/recruitment_repository.da
 import '../../features/recruitment/domain/usecases/create_session_usecase.dart';
 import '../../features/recruitment/domain/usecases/get_sessions_usecase.dart';
 import '../../features/recruitment/domain/usecases/upload_cvs_usecase.dart';
+import '../../features/recruitment/presentation/cubit/recruitment_cubit.dart';
 import '../../features/settings/data/datasources/settings_remote_datasource.dart';
 import '../../features/settings/data/repositories/settings_repository_impl.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
@@ -42,6 +43,10 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl()));
 
   // Features - Recruitment
+  sl.registerFactory(() => RecruitmentCubit(
+        createSessionUseCase: sl(),
+        getSessionsUseCase: sl(),
+      ));
   sl.registerLazySingleton(() => CreateSessionUseCase(sl()));
   sl.registerLazySingleton(() => GetSessionsUseCase(sl()));
   sl.registerLazySingleton(() => UploadCVsUseCase(sl()));

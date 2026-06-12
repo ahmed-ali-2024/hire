@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
+import 'features/recruitment/presentation/pages/recruitment_page.dart';
 
 class AppView extends StatelessWidget {
   const AppView({super.key});
@@ -16,9 +17,7 @@ class AppView extends StatelessWidget {
       home: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
           if (state is AuthAuthenticated) {
-            return const Scaffold(
-              body: Center(child: Text('Authenticated: Dashboard Coming Soon')),
-            );
+            return const RecruitmentPage();
           } else if (state is AuthUnauthenticated) {
             return const Scaffold(
               body: Center(child: Text('Login Page Coming Soon')),
