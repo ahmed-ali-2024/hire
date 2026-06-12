@@ -23,6 +23,7 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   List<PlatformFile> _selectedFiles = [];
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -45,9 +46,11 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking files: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking files: $e')),
+        );
+      }
     }
   }
 
@@ -63,77 +66,75 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
       final title = _titleController.text.trim();
       final desc = _descController.text.trim();
 
-      // Show progress dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      setState(() => _isLoading = true);
 
       final recruitmentCubit = context.read<RecruitmentCubit>();
       final fileUploadCubit = context.read<FileUploadCubit>();
       final scaffoldMessenger = ScaffoldMessenger.of(context);
-      final navigator = Navigator.of(context);
 
       try {
+        // Step 1: Create session
         final sessionResult = await recruitmentCubit.createSessionUseCase(CreateSessionParams(
           userId: userId,
           jobTitle: title,
           jobDescription: desc,
         ));
 
-        await sessionResult.fold(
-          (failure) async {
-            navigator.pop(); // Dismiss progress
+        String? errorMessage;
+        bool success = false;
+
+        sessionResult.fold(
+          (failure) {
+            errorMessage = failure.message;
+          },
+          (session) {},
+        );
+
+        if (errorMessage != null) {
+          if (mounted) setState(() => _isLoading = false);
+          scaffoldMessenger.showSnackBar(SnackBar(content: Text(errorMessage!)));
+          return;
+        }
+
+        // Extract session from result
+        final session = sessionResult.getOrElse((failure) => throw Exception(failure.message));
+
+        // Step 2: Update session status
+        await Supabase.instance.client
+            .from('recruitment_sessions')
+            .update({'status': 'analyzing'})
+            .eq('id', session.id);
+
+        // Step 3: Upload and parse CVs
+        final uploadResult = await fileUploadCubit.uploadCVsUseCase(UploadCVsParams(
+          sessionId: session.id,
+          files: _selectedFiles,
+        ));
+
+        if (mounted) setState(() => _isLoading = false);
+
+        uploadResult.fold(
+          (failure) {
             scaffoldMessenger.showSnackBar(
               SnackBar(content: Text(failure.message)),
             );
           },
-          (session) async {
-            try {
-              // Update session status and upload CVs
-              await Supabase.instance.client
-                  .from('recruitment_sessions')
-                  .update({'status': 'analyzing'})
-                  .eq('id', session.id);
-
-              final uploadResult = await fileUploadCubit.uploadCVsUseCase(UploadCVsParams(
-                sessionId: session.id,
-                files: _selectedFiles,
-              ));
-
-              navigator.pop(); // Dismiss progress
-
-              uploadResult.fold(
-                (failure) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(content: Text(failure.message)),
-                  );
-                },
-                (candidates) {
-                  recruitmentCubit.loadSessions(userId);
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(content: Text('Session created and CVs parsed successfully!')),
-                  );
-                  if (mounted) {
-                    context.go('/app/dashboard');
-                  }
-                },
-              );
-            } catch (e) {
-              navigator.pop(); // Dismiss progress
-              scaffoldMessenger.showSnackBar(
-                SnackBar(content: Text('Database or upload error: $e')),
-              );
-            }
+          (candidates) {
+            success = true;
+            recruitmentCubit.loadSessions(userId);
+            scaffoldMessenger.showSnackBar(
+              const SnackBar(content: Text('Session created and CVs parsed successfully!')),
+            );
           },
         );
+
+        if (success && mounted) {
+          context.go('/app/dashboard');
+        }
       } catch (e) {
-        navigator.pop(); // Dismiss progress
+        if (mounted) setState(() => _isLoading = false);
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Submission failed: $e')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     }
@@ -299,7 +300,21 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
                             const SizedBox(height: 40),
 
                             // Action Buttons
-                            Row(
+                            if (_isLoading)
+                              const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                                  child: Column(
+                                    children: [
+                                      CircularProgressIndicator(),
+                                      SizedBox(height: 16),
+                                      Text('Processing CVs...'),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            else
+                              Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 TextButton(
