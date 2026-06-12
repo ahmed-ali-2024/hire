@@ -67,7 +67,7 @@ class OrchestrationRemoteDataSourceImpl implements OrchestrationRemoteDataSource
         .eq('candidate_id', candidateId)
         .maybeSingle();
     if (response == null) return null;
-    return FinalReportModel.fromJson(response as Map<String, dynamic>);
+    return FinalReportModel.fromJson(response);
   }
 
   @override

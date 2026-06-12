@@ -49,18 +49,10 @@
 - [x] تسجيل الـ Use Cases والـ Repository والـ DataSource الخاص بالإعدادات في GetIt. *(أصبح مرجعياً)*
 - [x] ~~بناء الـ `SettingsCubit`~~ → **ملغاة** - المفاتيح ستكون في Edge Functions.
 - [x] ~~تصميم صفحة الإعدادات~~ → **ملغاة** - لا حاجة لإدخال مفاتيح يدوياً.
-- [ ] **[متبقي - جديد]** تخزين مفاتيح API كـ Secrets في مشروع Supabase:
-  ```
-  supabase secrets set AIMLAPI_KEY=xxx FEATHERLESS_KEY=xxx BAND_API_KEY=xxx BAND_API_URL=xxx
-  ```
-- [ ] **[متبقي - جديد]** إنشاء Supabase Edge Functions تعمل كوسيط (Proxy) بين التطبيق وخدمات الذكاء الاصطناعي:
-  - `analyze-cv` → يستقبل نص السيرة الذاتية + الوصف الوظيفي ويستدعي Screening Agent عبر AIMLAPI.
-  - `review-cv` → يستدعي Adversarial Reviewer عبر Featherless.
-  - `simulate-interview` → يستدعي Interview Agent ومحاكي المتقدم.
-  - `cultural-fit` → يستدعي Cultural Fit Agent.
-  - `coordinate` → يستدعي Coordinator Agent لكتابة التقرير النهائي.
-  - `band-relay` → يسجل ويوجه رسائل Band API بين الوكلاء.
-- [ ] **[متبقي - جديد]** تعديل طبقة الـ DataSource في التطبيق لاستدعاء Edge Functions بدلاً من الـ APIs مباشرة (الاستدعاء عبر `Supabase.instance.client.functions.invoke()`).
+- [x] **[مكتمل]** تخزين مفاتيح API كـ Secrets في مشروع Supabase (قام المستخدم بتهيئتها بالكامل ✅).
+- [x] **[مكتمل]** إنشاء Supabase Edge Functions تعمل كوسيط (Proxy) وتنسيق متكامل:
+  - بناء الـ Function المركزية `orchestrate-session` لتنسيق عمل الوكلاء الخمسة تتابعياً وتخزين النتائج.
+- [x] **[مكتمل]** تعديل طبقة الـ DataSource في التطبيق لاستدعاء Edge Functions بدلاً من الـ APIs مباشرة (الاستدعاء عبر `Supabase.instance.client.functions.invoke()`).
 
 ---
 
@@ -76,23 +68,23 @@
 
 ---
 
-### [ ] **المرحلة 4: نظام التنسيق وتشغيل الوكلاء الخمسة (Orchestration & Agents - F05-F08)**
+### [x] **المرحلة 4: نظام التنسيق وتشغيل الوكلاء الخمسة (Orchestration & Agents - F05-F08)**
 
 > [!NOTE]
-> جميع استدعاءات الوكلاء ستتم عبر **Supabase Edge Functions** بدلاً من الاتصال المباشر بـ APIs. التطبيق يرسل البيانات إلى Edge Function → Edge Function تستخدم المفاتيح المخزنة كـ Secrets → تُعيد النتيجة للتطبيق.
+> جميع استدعاءات الوكلاء تتم بنجاح عبر **Supabase Edge Functions** والنتائج تُخزن وتُرسل لمنصة **Band.ai** بشكل كامل.
 
-- [ ] بناء الهياكل والموديلات لنتائج تقييم الوكلاء وتقارير التعارض والتقرير النهائي.
-- [ ] إنشاء `OrchestrationRepository` و `OrchestrationRemoteDataSource` يستدعي Edge Functions بدلاً من APIs مباشرة.
-- [ ] كتابة Use Cases تشغيل الوكلاء الخمسة تتابعياً:
-  1. **Screening Agent** (Edge Function: `analyze-cv`) - فحص السيرة الذاتية الأولي.
-  2. **Adversarial Reviewer** (Edge Function: `review-cv`) - مراجعة مستقلة لكشف التحيز.
-  3. **Conflict Resolution** - حل التعارض ودمج الدرجات (يمكن أن يكون محلياً أو Edge Function).
-  4. **Interview Agent & Candidate Simulator** (Edge Function: `simulate-interview`) - توليد ومحاكاة المقابلة التقنية.
-  5. **Cultural Fit Agent** (Edge Function: `cultural-fit`) - تقييم السلوك والتوافق الثقافي.
-  6. **Coordinator Agent** (Edge Function: `coordinate`) - كتابة التقرير النهائي المدمج والتوصية النهائية.
-- [ ] ربط الاتصال بـ **Band API** عبر Edge Function (`band-relay`) لإرسال واستلام رسائل تسليم السياق (Context Handoff) وتسجيلها في جدول `band_messages_log` في كل خطوة.
-- [ ] بناء `OrchestrationCubit` لإدارة تشغيل وتتبع مراحل الوكلاء خطوة بخطوة.
-- [ ] تصميم صفحة التحليل (`AnalysisPage`) التي تعرض مؤشرات تقدم عمل الوكلاء بشكل تفاعلي أثناء التشغيل.
+- [x] بناء الهياكل والموديلات لنتائج تقييم الوكلاء وتقارير التعارض والتقرير النهائي (`AgentResultModel`, `FinalReportModel`).
+- [x] إنشاء `OrchestrationRepository` و `OrchestrationRemoteDataSource` وتفعيل استدعاء `orchestrate-session` بنجاح.
+- [x] كتابة واستدعاء الوكلاء الخمسة تتابعياً عبر الـ Edge Function الموحدة:
+  1. **Screening Agent** (تقييم أولي عبر AIMLAPI).
+  2. **Adversarial Reviewer** (كشف الانحياز والتعارض عبر Featherless).
+  3. **Conflict Resolution** (تحديد التعارضات تلقائياً).
+  4. **Interview Agent & Candidate Simulator** (توليد أسئلة وأجوبة المقابلة المقترحة).
+  5. **Cultural Fit Agent** (تقييم التوافق السلوكي).
+  6. **Coordinator Agent** (التقرير النهائي ودمج الأوزان والتوصية النهائية للجنة).
+- [x] ربط الاتصال بـ **Band API** لفتح غرف محادثة لكل جلسة وتداول رسائل Handoff وتخزينها في قاعدة البيانات.
+- [x] بناء `OrchestrationCubit` وإدارة الحالة بدقة.
+- [x] تصميم صفحة التحليل (`AnalysisPage`) بواجهة داكنة مذهلة مع Visual Pipeline ولوحة Band.ai Live المباشرة.
 
 ---
 
@@ -137,8 +129,8 @@ supabase secrets set BAND_API_URL=your_band_api_url_here
 |---------|--------|--------|
 | 0 - البنية التحتية | ✅ مكتمل | 100% |
 | 1 - المصادقة | ✅ مكتمل | 100% |
-| 2 - مفاتيح API (باك اند) | 🔄 جزئي | 40% (الهياكل جاهزة، Edge Functions متبقية) |
+| 2 - مفاتيح API (باك اند) | ✅ مكتمل | 100% |
 | 3 - الجلسات والرفع | ✅ مكتمل | 100% |
-| 4 - الوكلاء والتنسيق | ⏳ لم يبدأ | 0% |
+| 4 - الوكلاء والتنسيق | ✅ مكتمل | 100% |
 | 5 - التقارير و Band | ⏳ لم يبدأ | 0% |
 | 6 - الاختبار النهائي | ⏳ لم يبدأ | 0% |

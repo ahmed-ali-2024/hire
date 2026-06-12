@@ -201,13 +201,19 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      // Start agents analysis - will trigger orchestration in the next stage
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Agent Orchestration will be implemented in Phase 4!')),
-                                      );
+                                      context.push(
+                                        '/app/analysis/${session.id}',
+                                        extra: {
+                                          'jobTitle': session.jobTitle,
+                                          'jobDescription': session.jobDescription,
+                                          'candidates': candidates,
+                                        },
+                                      ).then((_) {
+                                        _fetchDetails();
+                                      });
                                     },
                                     icon: const Icon(Icons.rocket_launch),
-                                    label: const Text('Start AI Agents Analysis'),
+                                    label: Text(isAr ? 'بدء تحليل وكلاء الذكاء الاصطناعي' : 'Start AI Agents Analysis'),
                                     style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(vertical: 18),
                                       backgroundColor: theme.colorScheme.primary,
@@ -219,26 +225,63 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                   ),
                                 )
                               else if (session.status == SessionStatus.analyzing)
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      context.push(
+                                        '/app/analysis/${session.id}',
+                                        extra: {
+                                          'jobTitle': session.jobTitle,
+                                          'jobDescription': session.jobDescription,
+                                          'candidates': candidates,
+                                        },
+                                      ).then((_) {
+                                        _fetchDetails();
+                                      });
+                                    },
+                                    icon: const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                    ),
+                                    label: Text(isAr ? 'عرض تقدم التحليل الحالي' : 'View Current Analysis Progress'),
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 18),
+                                      backgroundColor: theme.colorScheme.primary,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
                                   ),
-                                  child: const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                                )
+                              else if (session.status == SessionStatus.completed)
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      context.push(
+                                        '/app/analysis/${session.id}',
+                                        extra: {
+                                          'jobTitle': session.jobTitle,
+                                          'jobDescription': session.jobDescription,
+                                          'candidates': candidates,
+                                        },
+                                      ).then((_) {
+                                        _fetchDetails();
+                                      });
+                                    },
+                                    icon: const Icon(Icons.analytics_outlined),
+                                    label: Text(isAr ? 'عرض تقارير وتحليلات الوكلاء' : 'View Agent Reports & Analysis'),
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 18),
+                                      backgroundColor: Colors.teal,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      SizedBox(width: 12),
-                                      Text(
-                                        'AI Agents are currently analyzing candidates...',
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                             ],
