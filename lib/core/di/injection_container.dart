@@ -8,10 +8,14 @@ import '../../features/auth/domain/usecases/sign_up_usecase.dart';
 import '../../features/auth/domain/usecases/sign_out_usecase.dart';
 import '../../features/auth/domain/usecases/check_auth_usecase.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
+import '../services/platform_service.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // Core Services
+  sl.registerLazySingleton<PlatformService>(() => PlatformServiceImpl());
+
   // Features - Auth
   // Cubit
   sl.registerLazySingleton(() => AuthCubit(
