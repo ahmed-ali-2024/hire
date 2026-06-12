@@ -67,14 +67,14 @@ async function bandSendMessage(
   mentions: Array<{ id: string; handle?: string; name?: string }>,
 ): Promise<void> {
   if (!roomId) return;
+  const validMentions = mentions.filter(m => m.id && m.id.trim() !== "");
   const res = await fetch(`${BAND_BASE_URL}/agent/chats/${roomId}/messages`, {
     method: "POST",
     headers: { "X-API-Key": senderApiKey, "Content-Type": "application/json" },
     body: JSON.stringify({
       message: {
-        text: content,
         content: content,
-        mentions,
+        mentions: validMentions,
       },
     }),
   });
