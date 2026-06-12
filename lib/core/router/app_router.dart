@@ -5,7 +5,10 @@ import '../di/injection_container.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../features/recruitment/presentation/cubit/recruitment_cubit.dart';
 import '../../features/recruitment/presentation/pages/dashboard_page.dart';
+import '../../features/recruitment/presentation/pages/new_recruitment_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import 'app_shell_layout.dart';
 import 'error_page.dart';
@@ -70,6 +73,13 @@ class AppRouter {
           GoRoute(
             path: '/app/dashboard',
             builder: (context, state) => const DashboardPage(),
+          ),
+          GoRoute(
+            path: '/app/recruitment/new',
+            builder: (context, state) => BlocProvider(
+              create: (context) => sl<RecruitmentCubit>(),
+              child: const NewRecruitmentPage(),
+            ),
           ),
           GoRoute(
             path: '/app/settings',

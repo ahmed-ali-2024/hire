@@ -36,8 +36,11 @@ import '../../features/recruitment/data/repositories/recruitment_repository_impl
 import '../../features/recruitment/domain/repositories/recruitment_repository.dart';
 import '../../features/recruitment/domain/usecases/create_session_usecase.dart';
 import '../../features/recruitment/domain/usecases/get_sessions_usecase.dart';
+import '../../features/recruitment/domain/usecases/get_session_by_id_usecase.dart';
+import '../../features/recruitment/domain/usecases/get_candidates_usecase.dart';
 import '../../features/recruitment/domain/usecases/upload_cvs_usecase.dart';
 import '../../features/recruitment/presentation/cubit/recruitment_cubit.dart';
+import '../../features/recruitment/presentation/cubit/file_upload_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -84,10 +87,19 @@ Future<void> init() async {
         createSessionUseCase: sl(),
         getSessionsUseCase: sl(),
       ));
+  sl.registerFactory(() => FileUploadCubit(
+        uploadCVsUseCase: sl(),
+      ));
   sl.registerLazySingleton(() => CreateSessionUseCase(sl()));
   sl.registerLazySingleton(() => GetSessionsUseCase(sl()));
+  sl.registerLazySingleton(() => GetSessionByIdUseCase(sl()));
+  sl.registerLazySingleton(() => GetCandidatesUseCase(sl()));
   sl.registerLazySingleton(() => UploadCVsUseCase(sl()));
-  sl.registerLazySingleton<RecruitmentRepository>(() => RecruitmentRepositoryImpl(sl()));
+  sl.registerLazySingleton<RecruitmentRepository>(() => RecruitmentRepositoryImpl(
+        remoteDataSource: sl(),
+        connectivityService: sl(),
+        cvParserService: sl(),
+      ));
   sl.registerLazySingleton<RecruitmentRemoteDataSource>(() => RecruitmentRemoteDataSourceImpl(sl()));
 
   // Features - Settings

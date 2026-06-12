@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hire/core/l10n/app_localizations.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../../core/l10n/locale_cubit.dart';
@@ -35,7 +36,7 @@ class DashboardPage extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.pushNamed(context, '/app/settings'),
+            onPressed: () => context.go('/app/settings'),
             tooltip: l10n.settings,
           ),
           IconButton(
@@ -73,7 +74,7 @@ class DashboardPage extends StatelessWidget {
               ),
               const SizedBox(height: 40),
               ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () => context.go('/app/recruitment/new'),
                 icon: const Icon(Icons.add),
                 label: Text(l10n.newRecruitment),
                 style: ElevatedButton.styleFrom(
