@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hire/core/l10n/app_localizations.dart';
 import 'package:hire/features/auth/presentation/cubit/auth_cubit.dart';
 
@@ -187,9 +188,9 @@ class _AuthFormWidgetState extends State<AuthFormWidget> {
                         TextButton(
                           onPressed: () {
                             if (widget.isSignUp) {
-                              Navigator.pushReplacementNamed(context, '/login');
+                              context.go('/login');
                             } else {
-                              Navigator.pushReplacementNamed(context, '/register');
+                              context.go('/register');
                             }
                           },
                           child: Text(
