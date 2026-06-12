@@ -15,6 +15,7 @@ class AnalysisPage extends StatefulWidget {
   final String jobDescription;
   final List<CandidateEntity> candidates;
   final bool runAnalysis;
+  final bool isCompleted;
 
   const AnalysisPage({
     super.key,
@@ -23,15 +24,26 @@ class AnalysisPage extends StatefulWidget {
     required this.jobDescription,
     required this.candidates,
     this.runAnalysis = false,
+    this.isCompleted = false,
   });
 
   @override
   State<AnalysisPage> createState() => _AnalysisPageState();
 }
 
+class _AgentStep {
+  final String key;
+  final String label;
+  final String emoji;
+  final String description;
+
+  _AgentStep(this.key, this.label, this.emoji, this.description);
+}
+
 class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late AnimationController _progressController;
+  late final AnimationController _pulseController;
+  late final AnimationController _progressController;
+  int _activeStep = 0;
   final List<Map<String, dynamic>> _bandMessages = [];
   RealtimeChannel? _realtimeChannel;
   bool _started = false;
@@ -43,8 +55,6 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
     _AgentStep('culturalAssessment', 'Cultural Fit Agent', '🌐', 'Cultural alignment evaluation'),
     _AgentStep('coordination', 'Coordinator Agent', '🎯', 'Final report synthesis'),
   ];
-
-  int _activeStep = 0;
 
   @override
   void initState() {
@@ -71,16 +81,46 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
     }
   }
 
-  void _loadExistingReports() {
-    setState(() {
-      _activeStep = _steps.length;
-    });
-    _progressController.forward();
-    _loadHistoricalMessages();
+  Future<void> _loadExistingReports() async {
+    // 1. First load historical messages
+    await _loadHistoricalMessages();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<OrchestrationCubit>().loadSessionReports(widget.sessionId);
-    });
+    // 2. Determine active step based on historical messages or if it's completed
+    if (widget.isCompleted) {
+      if (mounted) {
+        setState(() {
+          _activeStep = _steps.length;
+        });
+        _progressController.forward();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<OrchestrationCubit>().loadSessionReports(widget.sessionId);
+        });
+      }
+    } else {
+      // It's still analyzing. Find the last step from messages
+      int step = 0;
+      if (_bandMessages.isNotEmpty) {
+        final lastMsg = _bandMessages.last;
+        final agent = lastMsg['sender_agent'] as String? ?? '';
+        final stepIdx = _steps.indexWhere((s) => s.key == agent);
+        if (stepIdx != -1) {
+          step = stepIdx + 1; // Advance to next agent
+        }
+      }
+      if (mounted) {
+        setState(() {
+          _activeStep = step;
+        });
+        if (step > 0) _progressController.forward();
+        
+        // If it somehow reached the end
+        if (step >= _steps.length) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<OrchestrationCubit>().loadSessionReports(widget.sessionId);
+          });
+        }
+      }
+    }
   }
 
   Future<void> _loadHistoricalMessages() async {
