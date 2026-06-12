@@ -72,7 +72,8 @@ async function bandSendMessage(
     headers: { "X-API-Key": senderApiKey, "Content-Type": "application/json" },
     body: JSON.stringify({
       message: {
-        content,
+        text: content,
+        content: content,
         mentions,
       },
     }),
@@ -540,6 +541,17 @@ serve(async (req) => {
           summary: coordResult.summary,
           recommendation: coordResult.recommendation,
           raw_data: coordResult.rawData,
+        });
+
+        // Insert into band_messages_log so UI can advance
+        await supabase.from("band_messages_log").insert({
+          room_id: bandRoomId || sessionId,
+          session_id: sessionId,
+          candidate_id: candidate.id,
+          message_type: "finalEvaluation",
+          sender_agent: "coordination",
+          receiver_agent: "",
+          payload: { score: overallScore, summary: coordResult.summary, recommendation: coordResult.recommendation },
         });
 
         // Update candidate with overall score and status

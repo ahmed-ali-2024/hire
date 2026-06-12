@@ -14,6 +14,7 @@ class AnalysisPage extends StatefulWidget {
   final String jobTitle;
   final String jobDescription;
   final List<CandidateEntity> candidates;
+  final bool runAnalysis;
 
   const AnalysisPage({
     super.key,
@@ -21,6 +22,7 @@ class AnalysisPage extends StatefulWidget {
     required this.jobTitle,
     required this.jobDescription,
     required this.candidates,
+    this.runAnalysis = false,
   });
 
   @override
@@ -58,7 +60,44 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
     );
 
     _subscribeToRealtimeMessages();
-    _startAnalysis();
+    _initPage();
+  }
+
+  void _initPage() {
+    if (widget.runAnalysis) {
+      _startAnalysis();
+    } else {
+      _loadExistingReports();
+    }
+  }
+
+  void _loadExistingReports() {
+    setState(() {
+      _activeStep = _steps.length;
+    });
+    _progressController.forward();
+    _loadHistoricalMessages();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrchestrationCubit>().loadSessionReports(widget.sessionId);
+    });
+  }
+
+  Future<void> _loadHistoricalMessages() async {
+    try {
+      final messages = await Supabase.instance.client
+          .from('band_messages_log')
+          .select()
+          .eq('session_id', widget.sessionId)
+          .order('created_at');
+      if (mounted && messages.isNotEmpty) {
+        setState(() {
+          _bandMessages.addAll(List<Map<String, dynamic>>.from(messages));
+        });
+      }
+    } catch (e) {
+      AppLogger.instance.e('Error loading historical messages', e);
+    }
   }
 
   void _subscribeToRealtimeMessages() {
@@ -96,7 +135,7 @@ class _AnalysisPageState extends State<AnalysisPage> with TickerProviderStateMix
 
     // Simulate step advancement while waiting for real results
     Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _activeStep = 1);
+      if (mounted && widget.runAnalysis) setState(() => _activeStep = 1);
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

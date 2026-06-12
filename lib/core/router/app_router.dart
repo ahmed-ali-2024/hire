@@ -111,6 +111,7 @@ class AppRouter {
               final jobTitle = extra['jobTitle'] as String? ?? '';
               final jobDescription = extra['jobDescription'] as String? ?? '';
               final candidates = extra['candidates'] as List<CandidateEntity>? ?? [];
+              final runAnalysis = extra['runAnalysis'] as bool? ?? false;
               return BlocProvider(
                 create: (_) => sl<OrchestrationCubit>(),
                 child: AnalysisPage(
@@ -118,6 +119,7 @@ class AppRouter {
                   jobTitle: jobTitle,
                   jobDescription: jobDescription,
                   candidates: candidates,
+                  runAnalysis: runAnalysis,
                 ),
               );
             },
