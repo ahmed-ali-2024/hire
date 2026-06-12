@@ -1,4 +1,4 @@
-import '../../../core/usecases/base_entity.dart';
+import 'package:hire/core/usecases/base_entity.dart';
 import 'agent_result_entity.dart';
 
 class ConflictResolutionEntity extends BaseEntity {

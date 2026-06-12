@@ -20,6 +20,7 @@ dependencies:
 
   # Dependency Injection
   get_it: ^7.7.0
+  uuid: ^4.3.3
 
   # Routing
   go_router: ^13.2.0
@@ -28,7 +29,7 @@ dependencies:
   fpdart: ^1.1.0
   equatable: ^2.0.5
   json_annotation: ^4.9.0
-  intl: ^0.19.0
+  intl: ^0.20.2
 
   # Backend & APIs
   supabase_flutter: ^2.5.0
@@ -37,7 +38,7 @@ dependencies:
 
   # File Handling
   file_picker: ^8.0.0
-  syncfusion_flutter_pdf: ^25.1.37 # For CV parsing
+  syncfusion_flutter_pdf: any # For CV parsing
 
   # UI & Responsive
   flutter_screenutil: ^5.9.0
@@ -56,3 +57,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true # For l10n
+  assets:
+    - .env
+

@@ -1,4 +1,4 @@
-import '../../../core/usecases/base_entity.dart';
+import 'package:hire/core/usecases/base_entity.dart';
 
 enum SessionStatus { pending, analyzing, completed, failed }
 

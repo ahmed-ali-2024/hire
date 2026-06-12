@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:fpdart/fpdart.dart';
-import '../../../core/error/failures.dart';
+import 'package:hire/core/error/failures.dart';
 import '../entities/recruitment_session_entity.dart';
 import '../entities/candidate_entity.dart';
 

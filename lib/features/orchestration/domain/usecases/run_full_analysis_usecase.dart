@@ -1,8 +1,8 @@
 import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../../recruitment/domain/entities/candidate_entity.dart';
-import '../../settings/domain/entities/api_keys_entity.dart';
+import 'package:hire/features/recruitment/domain/entities/candidate_entity.dart';
+import 'package:hire/features/settings/domain/entities/api_keys_entity.dart';
 import '../entities/final_report_entity.dart';
 import '../repositories/orchestration_repository.dart';
 

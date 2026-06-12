@@ -1,5 +1,5 @@
 import 'package:fpdart/fpdart.dart';
-import '../../../core/error/failures.dart';
+import 'package:hire/core/error/failures.dart';
 import '../entities/api_keys_entity.dart';
 
 abstract class SettingsRepository {
