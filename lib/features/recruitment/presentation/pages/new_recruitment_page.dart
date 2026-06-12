@@ -74,48 +74,68 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
 
       final recruitmentCubit = context.read<RecruitmentCubit>();
       final fileUploadCubit = context.read<FileUploadCubit>();
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      final navigator = Navigator.of(context);
 
-      recruitmentCubit.createSessionUseCase(CreateSessionParams(
-        userId: userId,
-        jobTitle: title,
-        jobDescription: desc,
-      )).then((sessionResult) {
-        sessionResult.fold(
-          (failure) {
-            Navigator.pop(context); // Dismiss progress
-            ScaffoldMessenger.of(context).showSnackBar(
+      try {
+        final sessionResult = await recruitmentCubit.createSessionUseCase(CreateSessionParams(
+          userId: userId,
+          jobTitle: title,
+          jobDescription: desc,
+        ));
+
+        await sessionResult.fold(
+          (failure) async {
+            navigator.pop(); // Dismiss progress
+            scaffoldMessenger.showSnackBar(
               SnackBar(content: Text(failure.message)),
             );
           },
-          (session) {
-            // Update session status and upload CVs
-            Supabase.instance.client.from('recruitment_sessions')
-                .update({'status': 'analyzing'}).eq('id', session.id).then((_) {
-              fileUploadCubit.uploadCVsUseCase(UploadCVsParams(
+          (session) async {
+            try {
+              // Update session status and upload CVs
+              await Supabase.instance.client
+                  .from('recruitment_sessions')
+                  .update({'status': 'analyzing'})
+                  .eq('id', session.id);
+
+              final uploadResult = await fileUploadCubit.uploadCVsUseCase(UploadCVsParams(
                 sessionId: session.id,
                 files: _selectedFiles,
-              )).then((uploadResult) {
-                Navigator.pop(context); // Dismiss progress
-                uploadResult.fold(
-                  (failure) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(failure.message)),
-                    );
-                  },
-                  (candidates) {
-                    // Update session status and redirect
-                    recruitmentCubit.loadSessions(userId);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Session created and CVs parsed successfully!')),
-                    );
+              ));
+
+              navigator.pop(); // Dismiss progress
+
+              uploadResult.fold(
+                (failure) {
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(content: Text(failure.message)),
+                  );
+                },
+                (candidates) {
+                  recruitmentCubit.loadSessions(userId);
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(content: Text('Session created and CVs parsed successfully!')),
+                  );
+                  if (mounted) {
                     context.go('/app/dashboard');
-                  },
-                );
-              });
-            });
+                  }
+                },
+              );
+            } catch (e) {
+              navigator.pop(); // Dismiss progress
+              scaffoldMessenger.showSnackBar(
+                SnackBar(content: Text('Database or upload error: $e')),
+              );
+            }
           },
         );
-      });
+      } catch (e) {
+        navigator.pop(); // Dismiss progress
+        scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Submission failed: $e')),
+        );
+      }
     }
   }
 
