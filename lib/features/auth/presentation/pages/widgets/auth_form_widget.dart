@@ -99,6 +99,54 @@ class _AuthFormWidgetState extends State<AuthFormWidget> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+
+                        // Demo credentials card (only on login page)
+                        if (!widget.isSignUp) ...[
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.info_outline, size: 18, color: theme.colorScheme.primary),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Demo Account',
+                                      style: theme.textTheme.labelLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    const SizedBox(width: 26),
+                                    Expanded(
+                                      child: SelectableText(
+                                        'Email: a3a1981@gmail.com\nPassword: 12345678',
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          fontFamily: 'monospace',
+                                          height: 1.6,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+
                         const SizedBox(height: 32),
 
                         // Email Field
