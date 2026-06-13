@@ -12,3 +12,14 @@
 *.docs/
 /.build
 docs/
+
+# Flutter/Dart generated directories
+.dart_tool/
+build/
+windows/flutter/ephemeral/
+.flutter-plugins
+.flutter-plugins-dependencies
+linux/flutter/ephemeral/
+macos/Flutter/ephemeral/
+*.iml
+.idea/

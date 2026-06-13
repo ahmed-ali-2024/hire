@@ -57,4 +57,6 @@ abstract class OrchestrationRepository {
   Future<Either<Failure, List<FinalReportEntity>>> getFinalReports(String sessionId);
 
   Future<Either<Failure, FinalReportEntity>> getCandidateReport(String candidateId);
+
+  Future<Either<Failure, List<AgentResultEntity>>> getAgentResults(String sessionId, String candidateId);
 }

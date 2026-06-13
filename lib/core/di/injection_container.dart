@@ -19,6 +19,7 @@ import '../../features/orchestration/data/repositories/orchestration_repository_
 import '../../features/orchestration/domain/repositories/orchestration_repository.dart';
 import '../../features/orchestration/domain/usecases/run_full_analysis_usecase.dart';
 import '../../features/orchestration/presentation/cubit/orchestration_cubit.dart';
+import '../../features/orchestration/presentation/cubit/candidate_report_cubit.dart';
 
 // Auth Features
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -135,6 +136,10 @@ Future<void> init() async {
         repositoryImpl: sl(),
         repository: sl(),
         supabaseClient: sl(),
+      ));
+  sl.registerFactory(() => CandidateReportCubit(
+        orchestrationRepository: sl(),
+        recruitmentRepository: sl(),
       ));
 
   // External

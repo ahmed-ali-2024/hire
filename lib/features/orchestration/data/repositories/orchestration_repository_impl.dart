@@ -67,6 +67,17 @@ class OrchestrationRepositoryImpl implements OrchestrationRepository {
   }
 
   @override
+  Future<Either<Failure, List<AgentResultEntity>>> getAgentResults(String sessionId, String candidateId) async {
+    try {
+      final results = await remoteDataSource.getAgentResults(sessionId, candidateId);
+      return Right(results);
+    } catch (e) {
+      AppLogger.instance.e('getAgentResults failed', e);
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<BandMessageEntity>>> getBandMessages(
       String sessionId, String candidateId) async {
     try {

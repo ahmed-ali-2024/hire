@@ -14,7 +14,10 @@ import '../../features/recruitment/presentation/pages/new_recruitment_page.dart'
 import '../../features/recruitment/presentation/pages/session_detail_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/orchestration/presentation/cubit/orchestration_cubit.dart';
+import '../../features/orchestration/presentation/cubit/candidate_report_cubit.dart';
 import '../../features/orchestration/presentation/pages/analysis_page.dart';
+import '../../features/orchestration/presentation/pages/reports_page.dart';
+import '../../features/orchestration/presentation/pages/candidate_report_page.dart';
 import 'app_shell_layout.dart';
 import 'error_page.dart';
 
@@ -96,6 +99,38 @@ class AppRouter {
               return BlocProvider(
                 create: (context) => sl<SessionDetailCubit>(),
                 child: SessionDetailPage(sessionId: sessionId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/app/recruitment/:id/reports',
+            builder: (context, state) {
+              final sessionId = state.pathParameters['id'] ?? '';
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (_) => sl<OrchestrationCubit>()),
+                  BlocProvider(create: (_) => sl<SessionDetailCubit>()),
+                ],
+                child: ReportsPage(sessionId: sessionId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/app/recruitment/:id/candidate/:candidateId',
+            builder: (context, state) {
+              final sessionId = state.pathParameters['id'] ?? '';
+              final candidateId = state.pathParameters['candidateId'] ?? '';
+              final extra = state.extra as Map<String, dynamic>? ?? {};
+              final candidateName = extra['candidateName'] as String? ?? '';
+              final currentStatus = extra['currentStatus'] as CandidateStatus? ?? CandidateStatus.pending;
+              return BlocProvider(
+                create: (_) => sl<CandidateReportCubit>(),
+                child: CandidateReportPage(
+                  sessionId: sessionId,
+                  candidateId: candidateId,
+                  candidateName: candidateName,
+                  currentStatus: currentStatus,
+                ),
               );
             },
           ),

@@ -231,13 +231,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                   child: ElevatedButton.icon(
                                     onPressed: () {
                                       context.push(
-                                        '/app/analysis/${session.id}',
-                                        extra: {
-                                          'jobTitle': session.jobTitle,
-                                          'jobDescription': session.jobDescription,
-                                          'candidates': candidates,
-                                          'runAnalysis': false,
-                                        },
+                                        '/app/recruitment/${session.id}/reports',
                                       ).then((_) {
                                         _fetchDetails();
                                       });
@@ -317,8 +311,23 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                 ),
                               ),
                               elevation: 1,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: session.status == SessionStatus.completed
+                                    ? () {
+                                        context.push(
+                                          '/app/recruitment/${session.id}/candidate/${candidate.id}',
+                                          extra: {
+                                            'candidateName': candidate.name,
+                                            'currentStatus': candidate.status,
+                                          },
+                                        ).then((_) {
+                                          _fetchDetails();
+                                        });
+                                      }
+                                    : null,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
                                 child: Row(
                                   children: [
                                     CircleAvatar(
@@ -405,6 +414,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                   ],
                                 ),
                               ),
+                             ),
                             );
                           },
                         ),
