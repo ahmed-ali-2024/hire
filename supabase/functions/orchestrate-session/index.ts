@@ -52,7 +52,7 @@ async function bandAddParticipant(roomId: string, agentApiKey: string, participa
   const res = await fetch(`${BAND_BASE_URL}/agent/chats/${roomId}/participants`, {
     method: "POST",
     headers: { "X-API-Key": agentApiKey, "Content-Type": "application/json" },
-    body: JSON.stringify({ participant: { id: participantId } }),
+    body: JSON.stringify({ participant: { participant_id: participantId } }),
   });
   if (!res.ok) {
     const err = await res.text();
