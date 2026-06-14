@@ -71,15 +71,15 @@ class _DashboardPageState extends State<DashboardPage> {
             onPressed: () => context.read<LocaleCubit>().toggleLocale(),
             tooltip: l10n.language,
           ),
-          IconButton(
-            icon: Icon(
-              context.watch<ThemeCubit>().state == ThemeMode.dark
-                  ? Icons.light_mode_outlined
-                  : Icons.dark_mode_outlined,
-            ),
-            onPressed: () => context.read<ThemeCubit>().toggleTheme(),
-            tooltip: l10n.theme,
-          ),
+          // IconButton(
+          //   icon: Icon(
+          //     context.watch<ThemeCubit>().state == ThemeMode.dark
+          //         ? Icons.light_mode_outlined
+          //         : Icons.dark_mode_outlined,
+          //   ),
+          //   onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+          //   tooltip: l10n.theme,
+          // ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.go('/app/settings'),

@@ -2,28 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class ThemeCubit extends HydratedCubit<ThemeMode> {
-  ThemeCubit() : super(ThemeMode.dark); // Dark mode by default for premium hacker aesthetics
+  ThemeCubit() : super(ThemeMode.light); // Light mode by default as requested
 
   void toggleTheme() {
-    if (state == ThemeMode.dark) {
-      emit(ThemeMode.light);
-    } else {
-      emit(ThemeMode.dark);
-    }
+    // Disabled theme toggling, keeping it light
+    emit(ThemeMode.light);
   }
 
   void setTheme(ThemeMode mode) {
-    emit(mode);
+    // Always force light mode
+    emit(ThemeMode.light);
   }
 
   @override
   ThemeMode? fromJson(Map<String, dynamic> json) {
-    final index = json['theme_mode'] as int?;
-    return index != null ? ThemeMode.values[index] : ThemeMode.dark;
+    // Force Light mode even if a previous state was saved
+    return ThemeMode.light;
   }
 
   @override
   Map<String, dynamic>? toJson(ThemeMode state) {
-    return {'theme_mode': state.index};
+    return {'theme_mode': ThemeMode.light.index};
   }
 }

@@ -19,15 +19,15 @@ class LoginPage extends StatelessWidget {
             onPressed: () => context.read<LocaleCubit>().toggleLocale(),
             tooltip: 'Toggle Language',
           ),
-          IconButton(
-            icon: Icon(
-              context.watch<ThemeCubit>().state == ThemeMode.dark
-                  ? Icons.light_mode_outlined
-                  : Icons.dark_mode_outlined,
-            ),
-            onPressed: () => context.read<ThemeCubit>().toggleTheme(),
-            tooltip: 'Toggle Theme',
-          ),
+          // IconButton(
+          //   icon: Icon(
+          //     context.watch<ThemeCubit>().state == ThemeMode.dark
+          //         ? Icons.light_mode_outlined
+          //         : Icons.dark_mode_outlined,
+          //   ),
+          //   onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+          //   tooltip: 'Toggle Theme',
+          // ),
           const SizedBox(width: 12),
         ],
       ),
