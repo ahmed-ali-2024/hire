@@ -21,7 +21,7 @@ void main() async {
   // 2. Initialize Supabase with env configuration
   await Supabase.initialize(
     url: EnvironmentConfig.instance.supabaseUrl,
-    anonKey: EnvironmentConfig.instance.supabaseAnonKey,
+    publishableKey: EnvironmentConfig.instance.supabaseAnonKey,
   );
 
   // 3. Initialize HydratedBloc Storage

@@ -33,6 +33,16 @@ jobs:
         run: |
           flutter pub get
 
+      # 4.5. إنشاء ملف config.env مؤقت لعملية البناء
+      - name: Create Temporary config.env File
+        run: |
+          echo "ENVIRONMENT=production" > config.env
+          echo "SUPABASE_URL=https://fedbxlfyrtwctmyolioq.supabase.co" >> config.env
+          echo "SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlZGJ4bGZ5cnR3Y3RteW9saW9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNDY3MDgsImV4cCI6MjA5NjgyMjcwOH0.KbujUj8CDhxwsq2VBe81v4-TBMsnsbhPad-XXuq5qCY" >> config.env
+          echo "AIMLAPI_BASE_URL=https://api.aimlapi.com/v1" >> config.env
+          echo "FEATHERLESS_BASE_URL=https://api.featherless.ai/v1" >> config.env
+          echo "BAND_API_URL=https://api.band.ai/v1" >> config.env
+
       # 5. بناء نسخة الويب مع إعداد المسار الفرعي /hire/
       - name: Build Flutter Web
         run: |
