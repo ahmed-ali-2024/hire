@@ -8,6 +8,7 @@ import 'package:hire/features/orchestration/presentation/cubit/orchestration_cub
 import 'package:hire/features/orchestration/presentation/cubit/orchestration_state.dart';
 import 'package:hire/features/recruitment/domain/entities/candidate_entity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AnalysisPage extends StatefulWidget {
   final String sessionId;
@@ -241,7 +242,7 @@ class _AnalysisPageState extends State<AnalysisPage>
         );
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: BlocConsumer<OrchestrationCubit, OrchestrationState>(
           listener: (context, state) {
             if (state is OrchestrationCompleted) {
@@ -286,18 +287,22 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildAppBar() {
+    final theme = Theme.of(context);
     return SliverAppBar(
       expandedHeight: 120,
       floating: false,
       pinned: true,
-      backgroundColor: const Color(0xFF0A0E1A),
+      backgroundColor: theme.colorScheme.primary,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF1A1F35), Color(0xFF0A0E1A)],
+              colors: [
+                theme.colorScheme.primary,
+                theme.colorScheme.primary.withOpacity(0.85),
+              ],
             ),
           ),
         ),
@@ -315,7 +320,10 @@ class _AnalysisPageState extends State<AnalysisPage>
             ),
             Text(
               widget.jobTitle,
-              style: const TextStyle(color: Color(0xFF6C7AFF), fontSize: 12),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 12,
+              ),
             ),
           ],
         ),
@@ -394,7 +402,7 @@ class _AnalysisPageState extends State<AnalysisPage>
                 Text(
                   '${widget.candidates.length} candidate${widget.candidates.length > 1 ? 's' : ''} · Band.ai Connected',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                     fontSize: 13,
                   ),
                 ),
@@ -407,12 +415,20 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildAgentPipeline(OrchestrationState state) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF141929),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.07)),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,10 +444,10 @@ class _AnalysisPageState extends State<AnalysisPage>
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Agent Pipeline',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: theme.textTheme.titleMedium?.color,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -457,7 +473,7 @@ class _AnalysisPageState extends State<AnalysisPage>
     } else if (isActive) {
       dotColor = const Color(0xFF6C7AFF);
     } else {
-      dotColor = Colors.white24;
+      dotColor = theme.disabledColor.withOpacity(0.4);
     }
 
     return Padding(
@@ -501,7 +517,7 @@ class _AnalysisPageState extends State<AnalysisPage>
                   height: 32,
                   color: isCompleted
                       ? const Color(0xFF00E5A0).withOpacity(0.4)
-                      : Colors.white12,
+                      : theme.dividerColor.withOpacity(0.15),
                 ),
             ],
           ),
@@ -515,7 +531,7 @@ class _AnalysisPageState extends State<AnalysisPage>
                   Text(
                     step.title,
                     style: TextStyle(
-                      color: isPending ? Colors.white38 : Colors.white,
+                      color: isPending ? theme.disabledColor : theme.textTheme.bodyLarge?.color,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -524,7 +540,7 @@ class _AnalysisPageState extends State<AnalysisPage>
                   Text(
                     step.description,
                     style: TextStyle(
-                      color: isPending ? Colors.white24 : Colors.white54,
+                      color: isPending ? theme.disabledColor.withOpacity(0.7) : theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                       fontSize: 12,
                     ),
                   ),
@@ -536,7 +552,7 @@ class _AnalysisPageState extends State<AnalysisPage>
                         animation: _pulseController,
                         builder: (_, __) => LinearProgressIndicator(
                           value: null,
-                          backgroundColor: Colors.white12,
+                          backgroundColor: theme.dividerColor.withOpacity(0.1),
                           valueColor: AlwaysStoppedAnimation<Color>(
                             const Color(
                               0xFF6C7AFF,
@@ -557,12 +573,20 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildBandMessagesPanel() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF141929),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFF6C7AFF).withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -604,7 +628,7 @@ class _AnalysisPageState extends State<AnalysisPage>
               const Spacer(),
               Text(
                 '${_bandMessages.length} messages',
-                style: const TextStyle(color: Colors.white38, fontSize: 12),
+                style: TextStyle(color: theme.textTheme.bodySmall?.color?.withOpacity(0.6), fontSize: 12),
               ),
             ],
           ),
@@ -615,7 +639,7 @@ class _AnalysisPageState extends State<AnalysisPage>
               padding: const EdgeInsets.only(top: 8),
               child: Text(
                 '+ ${_bandMessages.length - 5} more messages in Band Dashboard',
-                style: const TextStyle(color: Colors.white38, fontSize: 12),
+                style: TextStyle(color: theme.textTheme.bodySmall?.color?.withOpacity(0.6), fontSize: 12),
               ),
             ),
         ],
@@ -624,6 +648,7 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildMessageBubble(Map<String, dynamic> msg) {
+    final theme = Theme.of(context);
     final sender = msg['sender_agent'] as String? ?? 'agent';
     final receiver = msg['receiver_agent'] as String? ?? '';
     final payload = msg['payload'] as Map<String, dynamic>? ?? {};
@@ -637,7 +662,7 @@ class _AnalysisPageState extends State<AnalysisPage>
       'culturalAssessment': const Color(0xFF00E5A0),
       'coordination': const Color(0xFFFF79C6),
     };
-    final color = agentColors[sender] ?? Colors.white38;
+    final color = agentColors[sender] ?? theme.disabledColor;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -667,13 +692,13 @@ class _AnalysisPageState extends State<AnalysisPage>
                 ),
               ),
               if (receiver.isNotEmpty) ...[
-                const Text(
+                Text(
                   ' → ',
-                  style: TextStyle(color: Colors.white38, fontSize: 11),
+                  style: TextStyle(color: theme.textTheme.bodySmall?.color?.withOpacity(0.6), fontSize: 11),
                 ),
                 Text(
                   _agentDisplayName(receiver),
-                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                  style: TextStyle(color: theme.textTheme.bodySmall?.color?.withOpacity(0.6), fontSize: 11),
                 ),
               ],
               if (score != null) ...[
@@ -705,7 +730,7 @@ class _AnalysisPageState extends State<AnalysisPage>
               summary.length > 120
                   ? '${summary.substring(0, 120)}...'
                   : summary,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
+              style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 12),
             ),
           ],
         ],
@@ -714,28 +739,36 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildResultsPanel(List<FinalReportEntity> reports) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF141929),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFF00E5A0).withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.analytics_outlined,
                 color: Color(0xFF00E5A0),
                 size: 20,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 'Final Results',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: theme.textTheme.titleMedium?.color,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -750,13 +783,14 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildReportCard(FinalReportEntity report) {
+    final theme = Theme.of(context);
     final recommendation = report.finalRecommendation;
     final colors = {
       AgentRecommendation.accept: const Color(0xFF00E5A0),
       AgentRecommendation.reject: const Color(0xFFFF4C6E),
       AgentRecommendation.maybe: const Color(0xFFFFB347),
     };
-    final color = colors[recommendation] ?? Colors.white38;
+    final color = colors[recommendation] ?? theme.disabledColor;
     final labels = {
       AgentRecommendation.accept: '✅ ACCEPT',
       AgentRecommendation.reject: '❌ REJECT',
@@ -782,7 +816,7 @@ class _AnalysisPageState extends State<AnalysisPage>
                     Text(
                       'Overall Score',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
                         fontSize: 11,
                       ),
                     ),
@@ -866,7 +900,7 @@ class _AnalysisPageState extends State<AnalysisPage>
           const SizedBox(height: 8),
           Text(
             report.summaryNotes,
-            style: const TextStyle(color: Colors.white60, fontSize: 12),
+            style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8), fontSize: 12),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -876,6 +910,7 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildScoreRow(String label, double score, Color color) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -884,7 +919,7 @@ class _AnalysisPageState extends State<AnalysisPage>
             width: 80,
             child: Text(
               label,
-              style: const TextStyle(color: Colors.white54, fontSize: 12),
+              style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7), fontSize: 12),
             ),
           ),
           Expanded(
@@ -892,7 +927,7 @@ class _AnalysisPageState extends State<AnalysisPage>
               borderRadius: BorderRadius.circular(3),
               child: LinearProgressIndicator(
                 value: score / 10,
-                backgroundColor: Colors.white12,
+                backgroundColor: theme.dividerColor.withOpacity(0.1),
                 valueColor: AlwaysStoppedAnimation<Color>(color),
                 minHeight: 6,
               ),
@@ -922,7 +957,7 @@ class _AnalysisPageState extends State<AnalysisPage>
             icon: const Icon(Icons.arrow_back),
             label: const Text('Back to Session'),
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF6C7AFF),
+              backgroundColor: theme.colorScheme.primary,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -932,51 +967,66 @@ class _AnalysisPageState extends State<AnalysisPage>
         ),
         if (state.bandRoomId.isNotEmpty) ...[
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFF6C7AFF).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: const Color(0xFF6C7AFF).withOpacity(0.3),
+          InkWell(
+            onTap: () async {
+              final url = Uri.parse('https://app.band.ai/chats/${state.bandRoomId}');
+              try {
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                } else {
+                  AppLogger.instance.e('Could not launch Band dashboard for room: ${state.bandRoomId}');
+                }
+              } catch (e) {
+                AppLogger.instance.e('Error launching URL: $e');
+              }
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6C7AFF).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: const Color(0xFF6C7AFF).withOpacity(0.3),
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.broadcast_on_home,
-                  color: Color(0xFF6C7AFF),
-                  size: 18,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'View in Band Dashboard',
-                        style: TextStyle(
-                          color: Color(0xFF6C7AFF),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      Text(
-                        'Room: ${state.bandRoomId.substring(0, 8)}...',
-                        style: const TextStyle(
-                          color: Colors.white38,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.broadcast_on_home,
+                    color: Color(0xFF6C7AFF),
+                    size: 18,
                   ),
-                ),
-                const Icon(
-                  Icons.open_in_new,
-                  color: Color(0xFF6C7AFF),
-                  size: 16,
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'View in Band Dashboard',
+                          style: TextStyle(
+                            color: Color(0xFF6C7AFF),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          'Room: ${state.bandRoomId.substring(0, 8)}...',
+                          style: TextStyle(
+                            color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.open_in_new,
+                    color: Color(0xFF6C7AFF),
+                    size: 16,
+                  ),
+                ],
+              ),
             ),
           ),
         ],

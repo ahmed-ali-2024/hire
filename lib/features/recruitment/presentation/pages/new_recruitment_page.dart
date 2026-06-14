@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,6 +25,35 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
   final _descController = TextEditingController();
   List<PlatformFile> _selectedFiles = [];
   bool _isLoading = false;
+
+  void _fillDemoData({required bool isMatching}) {
+    setState(() {
+      if (isMatching) {
+        _titleController.text = 'Senior Flutter Developer';
+        _descController.text = '''We are looking for a Senior Flutter Developer with 5+ years of experience in mobile development.
+Requirements:
+- Deep knowledge of Dart and Flutter framework.
+- Experience with Clean Architecture and state management using Bloc.
+- Strong understanding of Git, REST APIs, and Supabase integration.
+- Ability to write clean, maintainable, and testable code.''';
+      } else {
+        _titleController.text = 'Bank Accountant';
+        _descController.text = '''We are looking for a certified Bank Accountant to manage financial records, prepare tax returns, and oversee auditing procedures.
+Requirements:
+- Bachelor's degree in Finance, Accounting, or relevant field.
+- Strong knowledge of accounting regulations, banking procedures, and GAAP principles.
+- Experience with financial software (QuickBooks, SAP) and ledger management.
+- Attention to detail and analytical skills.''';
+      }
+      _selectedFiles = [
+        PlatformFile(
+          name: 'demo_cv.pdf',
+          size: 15240, // 15 KB
+          bytes: Uint8List.fromList([0, 1, 2, 3]), // Dummy bytes to bypass null checks
+        )
+      ];
+    });
+  }
 
   @override
   void dispose() {
@@ -56,9 +86,11 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
 
   void _submit(BuildContext context, String userId) async {
     if (_formKey.currentState?.validate() ?? false) {
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
       if (_selectedFiles.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please upload at least one CV')),
+        final isAr = Localizations.localeOf(context).languageCode == 'ar';
+        scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text(isAr ? 'يرجى رفع سيرة ذاتية واحدة على الأقل' : 'Please upload at least one CV')),
         );
         return;
       }
@@ -70,7 +102,6 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
 
       final recruitmentCubit = context.read<RecruitmentCubit>();
       final fileUploadCubit = context.read<FileUploadCubit>();
-      final scaffoldMessenger = ScaffoldMessenger.of(context);
 
       try {
         // Step 1: Create session
@@ -122,8 +153,9 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
           (candidates) {
             success = true;
             recruitmentCubit.loadSessions(userId);
+            final isAr = Localizations.localeOf(context).languageCode == 'ar';
             scaffoldMessenger.showSnackBar(
-              const SnackBar(content: Text('Session created and CVs parsed successfully!')),
+              SnackBar(content: Text(isAr ? 'تم إنشاء الجلسة وتفسير السير الذاتية بنجاح!' : 'Session created and CVs parsed successfully!')),
             );
           },
         );
@@ -146,6 +178,7 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
     final theme = Theme.of(context);
     final authState = context.read<AuthCubit>().state;
     final userId = authState is AuthAuthenticated ? authState.user.id : '';
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return BlocProvider(
       create: (_) => di.sl<FileUploadCubit>(),
@@ -182,6 +215,54 @@ class _NewRecruitmentPageState extends State<NewRecruitmentPage> {
                             const SizedBox(height: 8),
                             const Text(
                               'Define the job requirements and upload candidates CVs in PDF format to start the multi-agent screening process.',
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              isAr
+                                  ? '💡 لوحة محاكاة المحكمين (بيانات تجريبية):'
+                                  : '💡 Judge Demo Control Panel (Sample Data):',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 12,
+                              children: [
+                                FilledButton.icon(
+                                  onPressed: () => _fillDemoData(isMatching: true),
+                                  icon: const Icon(Icons.check_circle_outline),
+                                  label: Text(
+                                    isAr
+                                        ? 'سيناريو: مرشح مطابق للوظيفة'
+                                        : 'Scenario: Matching Candidate',
+                                  ),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Colors.green.withOpacity(0.1),
+                                    foregroundColor: Colors.green,
+                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                                FilledButton.icon(
+                                  onPressed: () => _fillDemoData(isMatching: false),
+                                  icon: const Icon(Icons.cancel_outlined),
+                                  label: Text(
+                                    isAr
+                                        ? 'سيناريو: مرشح غير مطابق للوظيفة'
+                                        : 'Scenario: Mismatched Candidate',
+                                  ),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Colors.red.withOpacity(0.1),
+                                    foregroundColor: Colors.red,
+                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 32),
 

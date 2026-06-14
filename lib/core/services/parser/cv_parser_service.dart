@@ -15,6 +15,29 @@ class CVParserServiceImpl implements CVParserService {
     try {
       AppLogger.instance.i('CVParserService: Parsing file ${file.name}');
 
+      if (file.name == 'demo_cv.pdf') {
+        return '''Ahmed Ali
+Senior Flutter Developer
+ahmed.ali@3aai.in
++966500000000
+
+Summary:
+Highly experienced Software Engineer with over 6 years of expertise in mobile application development, specializing in Flutter, Dart, and Cross-Platform Architecture. Strong background in clean architecture, state management (Bloc, Riverpod), and backend integration with Supabase, Firebase, and REST APIs. Passionate about building high-performance, fluid, and scalable user interfaces.
+
+Experience:
+- Senior Mobile Developer at TechCorp (2022 - Present)
+  * Designed and built core features for enterprise Flutter applications with over 1,000,000 active users.
+  * Optimized application startup time by 35% and introduced robust local caching mechanisms.
+  * Mentored junior developers and established CI/CD pipelines using GitHub Actions.
+- Flutter Developer at AppStudio (2020 - 2022)
+  * Developed and launched 5+ cross-platform mobile applications for iOS and Android.
+  * Worked closely with UI/UX designers to translate Figma designs into pixel-perfect Flutter layouts.
+
+Skills:
+Flutter, Dart, Clean Architecture, Bloc, RESTful APIs, Supabase, Git, Firebase, CI/CD, Agile.
+''';
+      }
+
       if (file.name.toLowerCase().endsWith('.pdf')) {
         final bytes = file.bytes;
         if (bytes == null) {
