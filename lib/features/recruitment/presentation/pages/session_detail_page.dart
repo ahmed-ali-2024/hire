@@ -402,7 +402,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                                             ),
                                           ),
                                           Text(
-                                            '${(candidate.overallScore! * 100).toStringAsFixed(0)}%',
+                                            '${(candidate.overallScore! * 10).toStringAsFixed(0)}%',
                                             style: TextStyle(
                                               color: theme.colorScheme.primary,
                                               fontWeight: FontWeight.bold,
