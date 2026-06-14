@@ -230,6 +230,7 @@ class _AnalysisPageState extends State<AnalysisPage>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return PopScope(
       canPop: _activeStep >= _steps.length,
       onPopInvokedWithResult: (didPop, result) {
@@ -337,6 +338,7 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildStatusCard(OrchestrationState state) {
+    final theme = Theme.of(context);
     String statusText;
     Color statusColor;
     IconData statusIcon;
@@ -462,6 +464,7 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildStepTile(int index, OrchestrationState state) {
+    final theme = Theme.of(context);
     final step = _steps[index];
     final isCompleted = state is OrchestrationCompleted || index < _activeStep;
     final isActive = state is! OrchestrationCompleted && index == _activeStep;
@@ -948,6 +951,7 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   Widget _buildCompletedActions(OrchestrationCompleted state) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         SizedBox(

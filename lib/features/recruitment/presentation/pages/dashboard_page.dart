@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:hire/core/l10n/app_localizations.dart';
 import 'package:hire/features/recruitment/domain/entities/recruitment_session_entity.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
-import '../../../../core/theme/theme_cubit.dart';
 import '../../../../core/l10n/locale_cubit.dart';
 import '../cubit/recruitment_cubit.dart';
 

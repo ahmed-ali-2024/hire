@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/locale_cubit.dart';
-import '../../../../core/theme/theme_cubit.dart';
 import 'widgets/auth_form_widget.dart';
 
 class LoginPage extends StatelessWidget {
