@@ -14,8 +14,8 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // 1. Initialize EnvironmentConfig to read .env
+
+  // 1. Initialize EnvironmentConfig to read .env .
   await EnvironmentConfig.instance.init();
 
   // 2. Initialize Supabase with env configuration
