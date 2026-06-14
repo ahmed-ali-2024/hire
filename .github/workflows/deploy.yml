@@ -1,0 +1,55 @@
+name: Build and Deploy Flutter Web to 3aai.in/hire
+
+on:
+  push:
+    branches:
+      - main  # أو master حسب اسم فرعك الرئيسي على GitHub
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. جلب كود المشروع من مستودع GitHub
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # 2. تثبيت وإعداد بيئة Java
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. تثبيت وإعداد بيئة Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # 4. جلب اعتماديات المشروع
+      - name: Install Dependencies
+        run: |
+          flutter pub get
+
+      # 5. بناء نسخة الويب مع إعداد المسار الفرعي /hire/
+      - name: Build Flutter Web
+        run: |
+          flutter build web --base-href "/hire/" --release
+
+      # 6. نسخ ملف .htaccess إلى مجلد البناء لضمان رفعه
+      - name: Copy Routing File (.htaccess)
+        run: |
+          cp web/.htaccess build/web/ || true
+
+      # 7. رفع نسخة البناء إلى الاستضافة المشتركة عبر FTP
+      - name: Deploy to Namecheap via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          local-dir: build/web/
+          server-dir: ${{ secrets.FTP_SERVER_DIR }} # سيتم الرفع إلى المجلد الفرعي مثل /public_html/hire/
