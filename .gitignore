@@ -23,3 +23,5 @@ linux/flutter/ephemeral/
 macos/Flutter/ephemeral/
 *.iml
 .idea/
+.env
+config.env

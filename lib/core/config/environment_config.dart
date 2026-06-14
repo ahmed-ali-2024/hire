@@ -9,7 +9,7 @@ class EnvironmentConfig {
 
   Future<void> init() async {
     try {
-      final content = await rootBundle.loadString('.env');
+      final content = await rootBundle.loadString('config.env');
       final lines = content.split('\n');
       for (var line in lines) {
         line = line.trim();

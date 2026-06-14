@@ -58,5 +58,5 @@ flutter:
   uses-material-design: true
   generate: true # For l10n
   assets:
-    - .env
+    - config.env
 
