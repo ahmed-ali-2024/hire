@@ -1,4 +1,4 @@
-name: Build and Deploy Flutter Web to 3aai.in/hire
+name: Build and Deploy Flutter Web to 3aai.in/hire.
 
 on:
   push:
