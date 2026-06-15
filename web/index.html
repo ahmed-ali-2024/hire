@@ -31,8 +31,66 @@
 
   <title>hire</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      background-color: #F9FAFB;
+    }
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #4F46E5;
+      margin: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+    }
+
+    .loader {
+      border: 5px solid #E5E7EB;
+      border-radius: 50%;
+      border-top: 5px solid #4F46E5;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+  </style>
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div class="loading-container" id="loading-screen">
+    <div class="loader"></div>
+    <div class="loading-text">Loading App...</div>
+  </div>
+
+  <script>
+    // Remove the loading screen once Flutter initializes the app
+    window.addEventListener('flutter-first-frame', function() {
+      var loadingScreen = document.getElementById('loading-screen');
+      if (loadingScreen) {
+        loadingScreen.remove();
+      }
+    });
+  </script>
+
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
